@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 
 const GCP_IP = '34.136.143.41'; // replace if needed
-const WS_SEND = `wss://${GCP_IP}/send`; // mic audio to server
+const WS_SEND = `wss://${GCP_IP}/send`;    // mic audio to server
 const WS_RECEIVE = `wss://${GCP_IP}/receive`; // speaker audio from server
 
 (async () => {
@@ -18,15 +18,15 @@ const WS_RECEIVE = `wss://${GCP_IP}/receive`; // speaker audio from server
 
   const page = await browser.newPage();
 
-  // Browser logs
+  // Log browser console output
   page.on('console', msg => console.log('🧠 BROWSER:', msg.text()));
   page.on('pageerror', err => console.error('🔴 PAGE ERROR:', err));
 
   await page.goto('https://www.rime.ai/', { waitUntil: 'networkidle2' });
   console.log("✅ Page loaded. Clicking button...");
 
-  await page.mouse.click(100, 100); // simulate user interaction
-  await page.keyboard.press('Enter'); // simulate user interaction
+  await page.mouse.click(100, 100);
+  await page.keyboard.press('Enter');
 
   await page.evaluate(() => {
     const btn = [...document.querySelectorAll('button')]
@@ -54,15 +54,16 @@ const WS_RECEIVE = `wss://${GCP_IP}/receive`; // speaker audio from server
 
       processor.onaudioprocess = e => {
         const inputData = e.inputBuffer.getChannelData(0);
-        const pcm = new Int16Array(inputData.length);
+        const pcm = new Int32Array(inputData.length);
+
         for (let i = 0; i < inputData.length; i++) {
-          pcm[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFF;
+          pcm[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFFFFFF;
         }
 
         if (pcm.some(sample => sample !== 0)) {
           console.log("🧠 BROWSER: sending mic data", pcm.length);
         } else {
-          console.log("🧠 BROWSER: silence detected on local audio track", stream.getAudioTracks()[0]);
+          console.log("🧠 BROWSER: silence detected");
         }
 
         if (micSocket.readyState === 1) micSocket.send(pcm.buffer);
@@ -75,14 +76,16 @@ const WS_RECEIVE = `wss://${GCP_IP}/receive`; // speaker audio from server
     speakerSocket.onmessage = (event) => {
       console.log("🧠 BROWSER: received speaker data", event.data.byteLength);
 
-      const pcm = new Int16Array(event.data);
+      const pcm = new Int32Array(event.data);
       const float32 = new Float32Array(pcm.length);
+
       for (let i = 0; i < pcm.length; i++) {
-        float32[i] = pcm[i] / 0x7FFF;
+        float32[i] = pcm[i] / 0x7FFFFFFF;
       }
 
       const buffer = audioCtxOut.createBuffer(1, float32.length, 16000);
       buffer.copyToChannel(float32, 0);
+
       const src = audioCtxOut.createBufferSource();
       src.buffer = buffer;
       src.connect(audioCtxOut.destination);
