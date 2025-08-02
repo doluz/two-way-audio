@@ -8,15 +8,20 @@ console.log('Puppeteer Executable Path:', puppeteer.executablePath());
 
 (async () => {
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     executablePath: '/home/sidhdharth/.cache/puppeteer/chrome/linux-127.0.6533.88/chrome-linux64/chrome',
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
-      '--use-fake-ui-for-media-stream', // auto-allow mic
-      '--disable-dev-shm-usage'
+      '--use-fake-ui-for-media-stream',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--disable-software-rasterizer',
+      '--use-gl=swiftshader',
+      '--headless=new'
     ]
   });
+  
 
   const page = await browser.newPage();
   await page.goto('https://www.rime.ai/', { waitUntil: 'networkidle2' });
