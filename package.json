@@ -1,0 +1,17 @@
+
+{
+  "name": "meetstream-audio-bridge",
+  "version": "1.0.0",
+  "description": "Bi-directional WebSocket bridge between MeetStream and Rime.ai",
+  "main": "websocket-server.js",
+  "scripts": {
+    "start": "node websocket-server.js",
+    "rime": "node rime-bridge.js"
+  },
+  "dependencies": {
+    "puppeteer": "^22.7.1",
+    "ws": "^8.13.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
