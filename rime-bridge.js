@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 
-const GCP_IP = '34.136.143.41'; // replace if needed
+const GCP_IP = 'voice.meetstream.ai'; // replace if needed
 const WS_SEND = `wss://${GCP_IP}/send`;    // mic audio to server
 const WS_RECEIVE = `wss://${GCP_IP}/receive`; // speaker audio from server
 
