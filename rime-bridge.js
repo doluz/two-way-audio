@@ -53,6 +53,7 @@ console.log('Puppeteer Executable Path:', puppeteer.executablePath());
 
   // Inject actual audio code into browser context
   await page.evaluate((WS_SEND, WS_RECEIVE) => {
+    console.log("✅ Starting browser-side WebSocket + audio init...");
     (async () => {
       try {
         const micSocket = new WebSocket(WS_SEND);
