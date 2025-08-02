@@ -18,7 +18,6 @@ const WS_RECEIVE = `wss://${GCP_IP}/receive`; // speaker audio from server
 
   const page = await browser.newPage();
 
-  // Log browser console output
   page.on('console', msg => console.log('🧠 BROWSER:', msg.text()));
   page.on('pageerror', err => console.error('🔴 PAGE ERROR:', err));
 
@@ -54,19 +53,19 @@ const WS_RECEIVE = `wss://${GCP_IP}/receive`; // speaker audio from server
 
       processor.onaudioprocess = e => {
         const inputData = e.inputBuffer.getChannelData(0);
-        const pcm = new Int32Array(inputData.length);
+        const pcm32 = new Int32Array(inputData.length);
 
         for (let i = 0; i < inputData.length; i++) {
-          pcm[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFFFFFF;
+          const clamped = Math.max(-1, Math.min(1, inputData[i]));
+          pcm32[i] = clamped * 0x7FFFFFFF;
         }
 
-        if (pcm.some(sample => sample !== 0)) {
-          console.log("🧠 BROWSER: sending mic data", pcm.length);
+        if (micSocket.readyState === 1) {
+          micSocket.send(pcm32.buffer);
+          console.log("📤 Sent audio buffer to WS:", pcm32.byteLength, "bytes");
         } else {
-          console.log("🧠 BROWSER: silence detected");
+          console.log("⚠️ micSocket not ready");
         }
-
-        if (micSocket.readyState === 1) micSocket.send(pcm.buffer);
       };
     });
 
@@ -76,11 +75,11 @@ const WS_RECEIVE = `wss://${GCP_IP}/receive`; // speaker audio from server
     speakerSocket.onmessage = (event) => {
       console.log("🧠 BROWSER: received speaker data", event.data.byteLength);
 
-      const pcm = new Int32Array(event.data);
-      const float32 = new Float32Array(pcm.length);
+      const pcm32 = new Int32Array(event.data);
+      const float32 = new Float32Array(pcm32.length);
 
-      for (let i = 0; i < pcm.length; i++) {
-        float32[i] = pcm[i] / 0x7FFFFFFF;
+      for (let i = 0; i < pcm32.length; i++) {
+        float32[i] = pcm32[i] / 0x7FFFFFFF;
       }
 
       const buffer = audioCtxOut.createBuffer(1, float32.length, 16000);
