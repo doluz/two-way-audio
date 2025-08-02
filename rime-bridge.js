@@ -48,6 +48,8 @@ console.log('Puppeteer Executable Path:', puppeteer.executablePath());
   // Wait for iframe or chat UI to load (adjust selector based on Rime's site structure)
   await new Promise(resolve => setTimeout(resolve, 3000));
 
+  page.on('console', msg => console.log('🖥️ BROWSER LOG:', msg.text()));
+
 
   // Inject actual audio code into browser context
   await page.evaluate((WS_SEND, WS_RECEIVE) => {
