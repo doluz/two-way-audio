@@ -46,7 +46,8 @@ console.log('Puppeteer Executable Path:', puppeteer.executablePath());
   console.log('✅ Live Chat button clicked. Injecting audio bridge...');
 
   // Wait for iframe or chat UI to load (adjust selector based on Rime's site structure)
-  await page.waitForTimeout(3000);
+  await new Promise(resolve => setTimeout(resolve, 3000));
+
 
   // Inject actual audio code into browser context
   await page.evaluate((WS_SEND, WS_RECEIVE) => {
