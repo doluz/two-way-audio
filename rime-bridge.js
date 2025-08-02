@@ -1,8 +1,8 @@
 const puppeteer = require('puppeteer');
 
 const GCP_IP = '34.136.143.41'; // replace if needed
-const WS_SEND = `ws://${GCP_IP}:4001`; // mic audio to server
-const WS_RECEIVE = `ws://${GCP_IP}:4002`; // speaker audio from server
+const WS_SEND = `wss://${GCP_IP}/send`; // mic audio to server
+const WS_RECEIVE = `wss://${GCP_IP}/receive`; // speaker audio from server
 
 (async () => {
   const browser = await puppeteer.launch({
